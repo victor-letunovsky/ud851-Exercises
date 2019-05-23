@@ -18,6 +18,7 @@ package com.example.android.implicitintents;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
@@ -66,10 +67,11 @@ public class MainActivity extends AppCompatActivity {
      * @param v Button that was clicked.
      */
     public void onClickShareTextButton(View v) {
-        // TODO (5) Specify a String you'd like to share
+        // COMPLETED (5) Specify a String you'd like to share
+        String textToShare = "Welcome to the World!";
 
-        // TODO (6) Replace the Toast with shareText, passing in the String from step 5
-        Toast.makeText(this, "TODO: Share text when this is clicked", Toast.LENGTH_LONG).show();
+        // COMPLETED (6) Replace the Toast with shareText, passing in the String from step 5
+        shareText(textToShare);
     }
 
     /**
@@ -122,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * When constructing implicit Intents, you can use either the setData method or specify the
      * URI as the second parameter of the Intent's constructor,
-     * as I do in {@link #openWebPage(String)}
+     * as I do in {@code openWebPage(String)}
      *
      * @param geoLocation The Uri representing the location that will be opened in the map
      */
@@ -143,12 +145,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // TODO (1) Create a void method called shareText that accepts a String as a parameter
-    // Do steps 2 - 4 within the shareText method
+    // COMPLETED (1) Create a void method called shareText that accepts a String as a parameter
+    private void shareText(String textToShare) {
+        // Do steps 2 - 4 within the shareText method
 
-        // TODO (2) Create a String variable called mimeType and set it to "text/plain"
+        // COMPLETED (2) Create a String variable called mimeType and set it to "text/plain"
+        String mediaType = "text/plain";
 
-        // TODO (3) Create a title for the chooser window that will pop up
+        // COMPLETED (3) Create a title for the chooser window that will pop up
+        String title = "Learning How to Share";
 
-        // TODO (4) Use ShareCompat.IntentBuilder to build the Intent and start the chooser
+        // COMPLETED (4) Use ShareCompat.IntentBuilder to build the Intent and start the chooser
+        Intent chooserIntent = ShareCompat.IntentBuilder.from(this)
+                .setChooserTitle(title)
+                .setType(mediaType)
+                .setText(textToShare)
+                .createChooserIntent();
+
+        if (chooserIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(chooserIntent);
+        }
+    }
 }
