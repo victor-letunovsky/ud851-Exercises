@@ -16,6 +16,7 @@ package android.example.com.visualizerpreferences;
  * limitations under the License.
  */
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -23,13 +24,14 @@ import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.EditTextPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
+import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
 import android.widget.Toast;
 
-// TODO (1) Implement OnPreferenceChangeListener
+// COMPLETED (1) Implement OnPreferenceChangeListener
 public class SettingsFragment extends PreferenceFragmentCompat implements
-        OnSharedPreferenceChangeListener {
+        OnSharedPreferenceChangeListener, OnPreferenceChangeListener {
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
@@ -42,6 +44,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         int count = prefScreen.getPreferenceCount();
 
         // Go through all of the preferences, and set up their preference summary.
+        String sizeScale = getString(R.string.pref_size_key);
         for (int i = 0; i < count; i++) {
             Preference p = prefScreen.getPreference(i);
             // You don't need to set up preference summaries for checkbox preferences because
@@ -50,8 +53,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 String value = sharedPreferences.getString(p.getKey(), "");
                 setPreferenceSummary(p, value);
             }
+            // COMPLETED (3) Add the OnPreferenceChangeListener specifically to the EditTextPreference
+            if (p.getKey().equals(sizeScale)) {
+                p.setOnPreferenceChangeListener(this);
+            }
         }
-        // TODO (3) Add the OnPreferenceChangeListener specifically to the EditTextPreference
     }
 
     @Override
@@ -88,10 +94,40 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
     }
 
-    // TODO (2) Override onPreferenceChange. This method should try to convert the new preference value
+    // COMPLETED (2) Override onPreferenceChange. This method should try to convert the new preference value
     // to a float; if it cannot, show a helpful error message and return false. If it can be converted
     // to a float check that that float is between 0 (exclusive) and 3 (inclusive). If it isn't, show
     // an error message and return false. If it is a valid number, return true.
+    /**
+     * In this context, we're using the onPreferenceChange listener for checking whether the
+     * size scale setting was set to a valid value.
+     */
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        // Double check that the preference is the size scale preference
+        String sizeKey = getString(R.string.pref_size_key);
+        if (preference.getKey().equals(sizeKey)) {
+            String stringSize = (String) newValue;
+            try {
+                float size = Float.parseFloat(stringSize);
+                // If the number is outside of the acceptable range, show an error.
+                if (size > 3 || size <= 0) {
+                    createScaleSizeError(getContext()).show();
+                    return false;
+                }
+            } catch (NumberFormatException nfe) {
+                // If whatever the user entered can't be parsed to a number, show an error.
+                createScaleSizeError(getContext()).show();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Toast createScaleSizeError(Context context) {
+        return Toast.makeText(context,
+                "Please select a number between 0.1 and 3", Toast.LENGTH_SHORT);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
